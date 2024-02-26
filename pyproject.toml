@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "black-codeclimate"
+version = "1.0.0"
+description = "Convert black --diff output to a Code Climate report"
+authors = ["steinuil <steenuil.owl@gmail.com>"]
+readme = "README.md"
+repository = "https://github.com/steinuil/black-codeclimate"
+license = "MIT"
+keywords = ["Black", "CodeClimate", "GitLab", "GitLab-CI", "Code Quality"]
+packages = [{ include = "black_codeclimate" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+unidiff = "^0.7.5"
+
+[tool.poetry.scripts]
+black-codeclimate = "black_codeclimate.__main__:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
