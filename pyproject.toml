@@ -10,7 +10,7 @@ keywords = ["Black", "CodeClimate", "GitLab", "GitLab-CI", "Code Quality"]
 packages = [{ include = "black_codeclimate" }]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 unidiff = "^0.7.5"
 
 [tool.poetry.scripts]
