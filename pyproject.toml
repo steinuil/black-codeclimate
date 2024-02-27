@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "black-codeclimate"
-version = "1.0.1"
+version = "1.0.2"
 description = "Convert black --diff output to a Code Climate report"
 authors = ["steinuil <steenuil.owl@gmail.com>"]
 readme = "README.md"
