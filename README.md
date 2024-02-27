@@ -1,7 +1,9 @@
 # `black-codeclimate`
 
+[![PyPI version](https://badge.fury.io/py/black-codeclimate.svg)](https://badge.fury.io/py/black-codeclimate)
+
 Convert the output of `black --diff` to a report conforming to the [Code Climate spec](https://github.com/codeclimate/platform/blob/master/spec/analyzers/SPEC.md).
-It is made to be used in GitLab CI to generate a [Code Quality report](https://docs.gitlab.com/ee/ci/testing/code_quality.html), which will show a nice widget in merge requests showing the file and the lines affected by the reformatting.
+It is made to be used in GitLab CI to generate a [Code Quality report](https://docs.gitlab.com/ee/ci/testing/code_quality.html), which will show a nice widget in merge requests listing the file and the lines affected by the reformatting.
 
 `black-codeclimate` uses [unidiff](https://pypi.org/project/unidiff/) to parse a diff file and detect changes, and outputs a JSON array of Code Climate issue objects reporting the filename and line range of the change. In theory it could be used on any unified diff data, but I only tested it with `black --diff`'s output. Hit me up in the issues if you use it for anything else :)
 
