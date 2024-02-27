@@ -82,7 +82,9 @@ def generate_report(
                     begin = (source_lines[line_i - 1].source_line_no or 0) + 1
 
                 # Add changed lines to block_lines
-                while line_i < len(source_lines) and not line.is_context:
+                while (
+                    line_i < len(source_lines) and not source_lines[line_i].is_context
+                ):
                     line = source_lines[line_i]
                     block_lines.append(line)
 
