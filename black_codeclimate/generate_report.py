@@ -24,6 +24,29 @@ class CodeClimateIssue(TypedDict):
     check_name: str
 
 
+def create_issue(
+    fingerprint: str,
+    path: str,
+    begin: int,
+    end: int,
+    severity: str,
+    description: str,
+    check_name: str,
+) -> CodeClimateIssue:
+    return {
+        "fingerprint": hashlib.sha256(fingerprint.encode("utf-8")).hexdigest(),
+        "location": {
+            "path": path,
+            "lines": {"begin": begin, "end": end},
+        },
+        "severity": severity,
+        "description": description,
+        "check_name": check_name,
+        "type": "issue",
+        "categories": ["Style"],
+    }
+
+
 def generate_report(
     patch_set: PatchSet, severity: str, description: str, check_name: str
 ) -> List[CodeClimateIssue]:
@@ -61,20 +84,15 @@ def generate_report(
                 fingerprint += f"{patched_file}:{line_no}:{line.line_type}{line.value}"
 
             issues.append(
-                {
-                    "fingerprint": hashlib.sha256(
-                        fingerprint.encode("utf-8")
-                    ).hexdigest(),
-                    "location": {
-                        "path": patched_file.source_file,
-                        "lines": {"begin": begin, "end": begin + line_count - 1},
-                    },
-                    "severity": severity,
-                    "description": description,
-                    "check_name": check_name,
-                    "type": "issue",
-                    "categories": ["Style"],
-                }
+                create_issue(
+                    fingerprint=fingerprint,
+                    path=patched_file.source_file,
+                    begin=begin,
+                    end=begin + line_count - 1,
+                    severity=severity,
+                    description=description,
+                    check_name=check_name,
+                )
             )
 
     return issues
