@@ -54,45 +54,69 @@ def generate_report(
 
     for patched_file in patch_set:
         for hunk in patched_file:
-            # Note: this reports only one issue even if multiple separated in a
-            # single hunk are affected but whatever
-            begin: int = 0
-            for line in hunk.source_lines():
-                if line.is_removed:
-                    begin = line.source_line_no
+            source_lines = list(hunk.source_lines())
 
-            if not begin:
-                continue
+            line_i = 0
 
-            # This also kind of breaks when there's more than one chunk of separated lines
-            # affected.
-            line_count: int = 0
-            for line in hunk.source_lines():
-                if line.is_removed:
-                    line_count += 1
+            # There might be several unrelated changes in a single hunk.
+            # We detect that by collecting contiguous non-context lines
+            # and generating a different issue for each block.
+            while True:
+                block_lines = []
 
-            fingerprint = ""
-
-            for line in hunk:
-                if line.is_added:
-                    line_no = line.target_line_no
-                elif line.is_removed:
-                    line_no = line.source_line_no
-                else:
+                # Skip context lines
+                while line_i < len(source_lines) and source_lines[line_i].is_context:
+                    line_i += 1
                     continue
 
-                fingerprint += f"{patched_file}:{line_no}:{line.line_type}{line.value}"
+                if line_i >= len(source_lines):
+                    break
 
-            issues.append(
-                create_issue(
-                    fingerprint=fingerprint,
-                    path=patched_file.source_file,
-                    begin=begin,
-                    end=begin + line_count - 1,
-                    severity=severity,
-                    description=description,
-                    check_name=check_name,
+                line = source_lines[line_i]
+
+                if line.source_line_no:
+                    # Line was removed, set this as the starting line
+                    begin = line.source_line_no
+                else:
+                    # Line was added, get the source_line_no from one line back + 1
+                    begin = (source_lines[line_i - 1].source_line_no or 0) + 1
+
+                # Add changed lines to block_lines
+                while line_i < len(source_lines) and not line.is_context:
+                    line = source_lines[line_i]
+                    block_lines.append(line)
+
+                    line_i += 1
+
+                # Count removed lines and prepare fingerprint
+                line_count = 0
+                fingerprint = ""
+                for line in block_lines:
+                    if line.is_removed:
+                        line_count += 1
+                        line_no = line.target_line_no
+                    else:
+                        line_no = line.source_line_no
+
+                    fingerprint += (
+                        f"{patched_file}:{line_no}:{line.line_type}{line.value}"
+                    )
+
+                # Only added lines. Set the line_count to 1 to make sure
+                # we don't report a location end that's before the start
+                if line_count == 0:
+                    line_count = 1
+
+                issues.append(
+                    create_issue(
+                        fingerprint=fingerprint,
+                        path=patched_file.source_file,
+                        begin=begin,
+                        end=begin + line_count - 1,
+                        severity=severity,
+                        description=description,
+                        check_name=check_name,
+                    )
                 )
-            )
 
     return issues
